@@ -8,8 +8,7 @@
   },
   "scripts": {
     "start": "node lib/cli.js",
-    "test": "node lib/cli.js --help",
-    "prepublishOnly": "echo 'Ready to publish'"
+    "test": "node lib/cli.js --help"
   },
   "keywords": [
     "i18n",
