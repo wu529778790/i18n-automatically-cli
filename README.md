@@ -4,23 +4,7 @@
 
 一个强大的命令行工具，可以自动扫描您的项目中的中文文本，并将其替换为国际化调用，同时支持自动翻译生成多语言包。
 
-## 快速测试
-
-如果您已经克隆了这个项目，可以直接测试：
-
-```bash
-# 安装依赖
-npm install
-
-# 查看帮助
-node lib/cli.js --help
-
-# 初始化测试项目
-node lib/cli.js init
-
-# 查看配置
-node lib/cli.js config
-```
+vscode 插件：<https://github.com/wu529778790/i18n-automatically>
 
 ## 特性
 
