@@ -22,6 +22,10 @@
     "国际化"
   ],
   "author": "wu529778790",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wu529778790/i18n-automatically-cli"
+  },
   "license": "MIT",
   "dependencies": {
     "@babel/generator": "^7.25.6",
