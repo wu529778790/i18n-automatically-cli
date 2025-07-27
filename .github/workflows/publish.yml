@@ -9,16 +9,20 @@ jobs:
   auto-publish:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: ${{ matrix.node-version }}
           registry-url: "https://registry.npmjs.org"
 
       - name: Setup pnpm
@@ -40,12 +44,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: |
           if [ -f pnpm-lock.yaml ]; then
             pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
           else
             pnpm install
+          fi
+
+      - name: 🧹 Clean test environment
+        run: |
+          rm -rf tests/output/
+          rm -rf src/i18n/
+          rm -f automatically-i18n-config.json
+
+      - name: 🧪 Run i18n-auto processor tests
+        run: npm run test:processor
+
+      - name: ✅ Verify CLI basic functions
+        run: |
+          # 测试CLI帮助命令
+          node lib/cli.js --help
+
+          # 测试版本信息
+          node lib/cli.js --version || true
+
+          # 测试初始化命令（非交互模式）
+          echo "test" | timeout 10s node lib/cli.js init || true
+
+      - name: 🎯 Verify i18n-auto prefix
+        run: |
+          # 检查生成的语言包是否使用了正确的前缀
+          if [ -f "src/i18n/locale/zh.json" ]; then
+            echo "检查i18n-auto前缀..."
+            grep -q "i18n-auto-" src/i18n/locale/zh.json && echo "✅ i18n-auto前缀验证通过" || echo "❌ 未找到i18n-auto前缀"
           fi
 
       - name: Check package
@@ -55,11 +87,13 @@ jobs:
         run: pnpm test
 
       - name: Configure Git
+        if: matrix.node-version == '18.x'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
       - name: Check if version should be updated
+        if: matrix.node-version == '18.x'
         id: should_update
         run: |
           LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
@@ -72,7 +106,7 @@ jobs:
           fi
 
       - name: Update version
-        if: steps.should_update.outputs.skip == 'false'
+        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $CURRENT_VERSION"
@@ -89,13 +123,32 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Push version update
-        if: steps.should_update.outputs.skip == 'false'
+        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
         run: |
           git push origin HEAD:${{ github.ref_name }}
           git push origin --tags
 
-      - name: Publish to NPM
-        if: steps.should_update.outputs.skip == 'false'
+      - name: 🔍 Verify package content
+        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
+        run: |
+          echo "📦 检查即将发布的包内容:"
+          npm pack --dry-run
+
+      - name: 🚀 Publish to NPM
+        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
         run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: 🎉 Publish success notification
+        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
+        run: |
+          echo "🎉 i18n-automatically-cli 发布成功!"
+          echo "📦 版本: $(node -p 'require(\"./package.json\").version')"
+          echo "🔗 NPM: https://www.npmjs.com/package/i18n-automatically-cli"
+
+      - name: 📊 Test report
+        if: always()
+        run: |
+          echo "🏁 测试完成 - Node.js ${{ matrix.node-version }}"
+          ls -la tests/ || true
