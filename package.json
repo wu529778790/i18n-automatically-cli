@@ -1,6 +1,6 @@
 {
   "name": "i18n-automatically-cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "国际化多语言自动生成替换CLI工具",
   "main": "lib/cli.js",
   "bin": {
@@ -22,7 +22,8 @@
     "translation",
     "chinese",
     "多语言",
-    "国际化"
+    "国际化",
+    "i18n-auto"
   ],
   "author": "wu529778790",
   "repository": {
@@ -48,7 +49,8 @@
   "devDependencies": {},
   "files": [
     "lib/**/*",
-    "README.md"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=14.0.0"
