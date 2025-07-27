@@ -8,7 +8,10 @@
   },
   "scripts": {
     "start": "node lib/cli.js",
-    "test": "node lib/cli.js --help"
+    "test": "node lib/cli.js --help",
+    "test:processor": "node tests/test-runner.js",
+    "test:batch": "node lib/cli.js batch",
+    "test:all": "npm run test:processor && npm run test:batch"
   },
   "keywords": [
     "i18n",
