@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node lib/cli.js",
     "test": "node tests/test-runner.js",
+    "test:processor": "node tests/test-runner.js",
     "test:cli": "node lib/cli.js --help",
     "test:batch": "node lib/cli.js batch",
     "test:all": "npm run test && npm run test:cli && npm run test:batch",
