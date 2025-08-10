@@ -23,6 +23,8 @@ vscode 插件：<https://github.com/wu529778790/i18n-automatically>
 npm install -g i18n-automatically-cli
 ```
 
+运行环境要求: Node.js >= 16.0.0
+
 ## 快速开始
 
 ### 1. 初始化项目
@@ -169,6 +171,11 @@ i18n-auto switch zh
 }
 ```
 
+提示:
+
+- Windows 下无需以根路径开头，工具会自动规范化 `i18nFilePath`，避免错误指向磁盘根目录。
+- 生成的翻译键采用 `i18n-auto-` 前缀加 8 位 MD5，便于一致性与去重。
+
 ### 配置项说明
 
 - `i18nFilePath`: i18n 文件存放路径
@@ -267,8 +274,8 @@ import i18n from '@/i18n';
 function App() {
   return (
     <div>
-      <h1>{i18n.global.t('key_6K+Y6L+O')}</h1>
-      <button>{i18n.global.t('key_54K55Lik')}</button>
+      <h1>{i18n.global.t('i18n-auto-6ab12cde')}</h1>
+      <button>{i18n.global.t('i18n-auto-54f0a1b2')}</button>
     </div>
   );
 }
@@ -279,14 +286,14 @@ function App() {
 ```json
 // src/i18n/locale/zh.json
 {
-  "key_6K+Y6L+O": "欢迎使用我的应用",
-  "key_54K55Lik": "点击这里"
+  "i18n-auto-6ab12cde": "欢迎使用我的应用",
+  "i18n-auto-54f0a1b2": "点击这里"
 }
 
 // src/i18n/locale/en.json  
 {
-  "key_6K+Y6L+O": "Welcome to my app",
-  "key_54K55Lik": "Click here"
+  "i18n-auto-6ab12cde": "Welcome to my app",
+  "i18n-auto-54f0a1b2": "Click here"
 }
 ```
 

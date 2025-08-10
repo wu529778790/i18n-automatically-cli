@@ -8,10 +8,11 @@
   },
   "scripts": {
     "start": "node lib/cli.js",
-    "test": "node lib/cli.js --help",
-    "test:processor": "node tests/test-runner.js",
+    "test": "node tests/test-runner.js",
+    "test:cli": "node lib/cli.js --help",
     "test:batch": "node lib/cli.js batch",
-    "test:all": "npm run test:processor && npm run test:batch"
+    "test:all": "npm run test && npm run test:cli && npm run test:batch",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "i18n",
@@ -53,6 +54,6 @@
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   }
 }
