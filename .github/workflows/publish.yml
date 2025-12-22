@@ -5,6 +5,10 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 jobs:
   auto-publish:
     runs-on: ubuntu-latest
@@ -137,8 +141,6 @@ jobs:
       - name: 🚀 Publish to NPM
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
         run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 🎉 Publish success notification
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
