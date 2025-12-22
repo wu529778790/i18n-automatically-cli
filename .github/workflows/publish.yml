@@ -140,7 +140,7 @@ jobs:
 
       - name: 🚀 Publish to NPM
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
-        run: pnpm publish --no-git-checks
+        run: npm publish
 
       - name: 🎉 Publish success notification
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
