@@ -147,11 +147,27 @@ jobs:
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
         run: |
           echo "npm version: $(npm --version)"
-          echo "Package name: $(node -p "require('./package.json').name")"
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          echo "Package name: $PACKAGE_NAME"
           echo "Registry: $(npm config get registry)"
+
           # 确保 npm 版本 >= 11.5.1 (Trusted Publishing 要求)
           npm install -g npm@latest || true
-          npm publish --provenance
+
+          # 检查包是否已存在
+          echo "检查包是否已存在于 npm..."
+          if npm view "$PACKAGE_NAME" version > /dev/null 2>&1; then
+            echo "✅ 包已存在，可以发布新版本"
+          else
+            echo "⚠️  包尚未在 npm 上创建"
+            echo "💡 提示: 如果这是首次发布，请确保："
+            echo "   1. 在 npmjs.com 上配置了 OIDC 信任关系"
+            echo "   2. Subject 格式: repo:wu529778790/i18n-automatically-cli:ref:refs/heads/main"
+          fi
+
+          # 使用 --provenance 启用 Trusted Publishing
+          echo "🚀 开始发布..."
+          npm publish --provenance --access public
 
       - name: 🎉 Publish success notification
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
