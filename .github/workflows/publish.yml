@@ -12,10 +12,6 @@ permissions:
 jobs:
   auto-publish:
     runs-on: ubuntu-latest
-    # 并发控制：确保同一时间只有一个工作流实例运行版本更新和发布
-    concurrency:
-      group: publish-${{ github.ref }}
-      cancel-in-progress: false
 
     strategy:
       matrix:
