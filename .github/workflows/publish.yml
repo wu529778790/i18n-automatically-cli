@@ -112,6 +112,10 @@ jobs:
       - name: Update version
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
         run: |
+          # 拉取最新更改
+          git fetch origin ${{ github.ref_name }}
+          git pull origin ${{ github.ref_name }} --rebase || git pull origin ${{ github.ref_name }} --no-rebase
+
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Current version: $CURRENT_VERSION"
 
@@ -129,7 +133,8 @@ jobs:
       - name: Push version update
         if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
         run: |
-          git push origin HEAD:${{ github.ref_name }}
+          # 使用 --force-with-lease 安全地推送，避免覆盖其他人的提交
+          git push origin HEAD:${{ github.ref_name }} --force-with-lease || git push origin HEAD:${{ github.ref_name }}
           git push origin --tags
 
       - name: 🔍 Verify package content
