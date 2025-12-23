@@ -91,13 +91,13 @@ jobs:
         run: pnpm test
 
       - name: Configure Git
-        if: matrix.node-version == '18.x'
+        if: matrix.node-version == '20.x'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
       - name: Check if version should be updated
-        if: matrix.node-version == '18.x'
+        if: matrix.node-version == '20.x'
         id: should_update
         run: |
           LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
@@ -110,7 +110,7 @@ jobs:
           fi
 
       - name: Update version
-        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
+        if: matrix.node-version == '20.x' && steps.should_update.outputs.skip == 'false'
         run: |
           # 拉取最新更改
           git fetch origin ${{ github.ref_name }}
@@ -131,46 +131,65 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Push version update
-        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
+        if: matrix.node-version == '20.x' && steps.should_update.outputs.skip == 'false'
         run: |
           # 使用 --force-with-lease 安全地推送，避免覆盖其他人的提交
           git push origin HEAD:${{ github.ref_name }} --force-with-lease || git push origin HEAD:${{ github.ref_name }}
           git push origin --tags
 
       - name: 🔍 Verify package content
-        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
+        if: matrix.node-version == '20.x' && steps.should_update.outputs.skip == 'false'
         run: |
           echo "📦 检查即将发布的包内容:"
           npm pack --dry-run
 
       - name: 🚀 Publish to NPM using Trusted Publishing
-        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
+        if: matrix.node-version == '20.x' && steps.should_update.outputs.skip == 'false'
         run: |
+          echo "=== 环境信息 ==="
           echo "npm version: $(npm --version)"
+          echo "node version: $(node --version)"
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           echo "Package name: $PACKAGE_NAME"
           echo "Registry: $(npm config get registry)"
+          echo "GitHub Actor: ${{ github.actor }}"
+          echo "GitHub Ref: ${{ github.ref }}"
+          echo "GitHub Repository: ${{ github.repository }}"
 
           # 确保 npm 版本 >= 11.5.1 (Trusted Publishing 要求)
+          echo "=== 升级 npm ==="
           npm install -g npm@latest || true
+          echo "升级后的 npm version: $(npm --version)"
+
+          # 检查 npm 认证配置
+          echo "=== 检查 npm 配置 ==="
+          npm config list || true
+          echo "检查认证 token..."
+          if npm whoami > /dev/null 2>&1; then
+            echo "✅ npm 已认证: $(npm whoami)"
+          else
+            echo "⚠️  npm 未认证（这是正常的，OIDC 会在发布时自动认证）"
+          fi
 
           # 检查包是否已存在
-          echo "检查包是否已存在于 npm..."
+          echo "=== 检查包状态 ==="
           if npm view "$PACKAGE_NAME" version > /dev/null 2>&1; then
-            echo "✅ 包已存在，可以发布新版本"
+            EXISTING_VERSION=$(npm view "$PACKAGE_NAME" version)
+            echo "✅ 包已存在，当前版本: $EXISTING_VERSION"
           else
-            echo "⚠️  包尚未在 npm 上创建"
-            echo "💡 提示: 如果这是首次发布，请确保："
-            echo "   1. 在 npmjs.com 上配置了 OIDC 信任关系"
+            echo "⚠️  包尚未在 npm 上创建（首次发布）"
+            echo "💡 重要提示: 使用 OIDC Trusted Publishing 首次发布需要："
+            echo "   1. 在 https://www.npmjs.com/settings/YOUR_USERNAME/automation 配置 OIDC 信任关系"
             echo "   2. Subject 格式: repo:wu529778790/i18n-automatically-cli:ref:refs/heads/main"
+            echo "   3. 或者使用通配符: repo:wu529778790/i18n-automatically-cli:*"
           fi
 
           # 使用 --provenance 启用 Trusted Publishing
-          echo "🚀 开始发布..."
+          echo "=== 开始发布 ==="
           npm publish --provenance --access public
 
       - name: 🎉 Publish success notification
-        if: matrix.node-version == '18.x' && steps.should_update.outputs.skip == 'false'
+        if: matrix.node-version == '20.x' && steps.should_update.outputs.skip == 'false'
         run: |
           echo "🎉 i18n-automatically-cli 发布成功!"
           echo "📦 版本: $(node -p 'require(\"./package.json\").version')"
